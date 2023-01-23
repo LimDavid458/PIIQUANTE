@@ -1,10 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // Package for password encryption
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); // Package for Token encoding
 
 
 exports.signup =  (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
+    bcrypt.hash(req.body.password, 10) // Password encryption
     .then(hash => {
         const user = new User({
             email: req.body.email,
@@ -30,7 +30,7 @@ exports.login =  (req, res, next) => {
                 } else {
                     res.status(200).json({
                         userId: user._id,
-                        token: jwt.sign(
+                        token: jwt.sign(        // Token encoding
                             { userId: user._id },
                             'RANDOM_TOKEN_SECRET',
                             { expiresIn: '24h'}

@@ -4,6 +4,7 @@ const path = require('path');
 const stuffRoutes = require('./routes/stuff');
 const userRoutes = require('./routes/user');
 
+// Connect database
 mongoose.connect('mongodb+srv://David:YdaJIGi0TmVMhZV4@cluster0.mri7lhv.mongodb.net/?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true })
@@ -13,6 +14,7 @@ mongoose.connect('mongodb+srv://David:YdaJIGi0TmVMhZV4@cluster0.mri7lhv.mongodb.
 
 const app = express();
 
+// Give access to req customer
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
