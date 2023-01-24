@@ -1,5 +1,6 @@
 const Sauce = require('../models/Sauce');
 const fs = require('fs');
+const { json } = require('express');
 
 exports.getAllSauces = (req, res, next) => {
   Sauce.find().then(
@@ -88,7 +89,23 @@ exports.deleteSauce = (req, res, next) => {
 };
 
 exports.likeSauce = (req, res, next) => {
-  
+  const objectLike = req.body;
+  //console.log(objectLike);
+  Sauce.findOne({
+    _id: req.params.id
+  }).then(sauce => {
+    //console.log(sauce);
+      if ( !sauce.usersLiked.includes(objectLike.userId)){
+        Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
+        .then(() => res.status(200).json({message : 'Objet modifié!'}))
+        .catch(error => res.status(401).json({ error }));
+      } else {
+        console.log(false);
+      }
+  })
+  .catch( error => {
+    res.status(500).json({ error });
+  });
 }
 
 
