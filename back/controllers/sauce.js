@@ -89,18 +89,44 @@ exports.deleteSauce = (req, res, next) => {
 };
 
 exports.likeSauce = (req, res, next) => {
-  const objectLike = req.body;
-  //console.log(objectLike);
+  const {userId, like} = req.body;
+
   Sauce.findOne({
     _id: req.params.id
   }).then(sauce => {
-    //console.log(sauce);
-      if ( !sauce.usersLiked.includes(objectLike.userId)){
-        Sauce.updateOne({ _id: req.params.id}, { ...sauceObject, _id: req.params.id})
-        .then(() => res.status(200).json({message : 'Objet modifié!'}))
-        .catch(error => res.status(401).json({ error }));
-      } else {
-        console.log(false);
+      if ( !sauce.usersLiked.includes(userId) && like === 1){
+        Sauce.updateOne({ _id: req.params.id },  {
+          $inc:{ likes: like },
+          $push:{ usersLiked:userId } 
+        })
+        .then(() => res.status(200).json({ message: 'like +1 !'}))
+        .catch(error => res.status(400).json({ error }));
+
+      }else if ( sauce.usersLiked.includes(userId) && like === 0 ) {
+        Sauce.updateOne({ _id: req.params.id },  {
+          $inc:{ likes: -1 },
+          $pull:{ usersLiked: userId } 
+        })
+        .then(() => res.status(200).json({ message: 'like 0 !'}))
+        .catch(error => res.status(400).json({ error }));
+      }
+      
+      if ( !sauce.usersDisliked.includes(userId) && like === -1 ){
+        Sauce.updateOne({ _id: req.params.id },  {
+          $inc:{ dislikes: -like },
+          $push:{ usersDisliked: userId } 
+        })
+        .then(() => res.status(200).json({ message: 'dislike -1 !'}))
+        .catch(error => res.status(400).json({ error }));
+
+      }else if ( sauce.usersDisliked.includes(userId) && like === 0 ) {
+        Sauce.updateOne({ _id: req.params.id },  {
+          $inc:{ dislikes: -1 },
+          $pull:{ usersDisliked: userId } 
+        })
+        .then(() => res.status(200).json({ message: 'dislike 0 !'}))
+        .catch(error => res.status(400).json({ error }));
+
       }
   })
   .catch( error => {
@@ -108,5 +134,57 @@ exports.likeSauce = (req, res, next) => {
   });
 }
 
+exports.likeSauce2 = (req, res, next) => {
+  const {userId, like} = req.body;
+  const userParams = [ 'likes', 'usersLiked', 'dislikes', 'usersDisliked' ];
+  let modifTab = '$push', number = 1, userLike, userTab ;
+  
+  Sauce.findOne({
+    _id: req.params.id
+  }).then(sauce => {
+      switch (like) {
+        case 0: {
+          modifTab = '$pull';
+          number = -1;
+          if (sauce.usersLiked.includes(userId)) {
+            userLike = userParams[0];
+            userTab = userParams[1];
+          }else {
+            userLike = userParams[2];
+            userTab = userParams[3];
+          }
+          break;
+        }
+        case 1: {
+          if (!sauce.usersLiked.includes(userId)) {
+            userLike = userParams[0];
+            userTab = userParams[1];
+          }
+          break;
+        }
+        case -1: {
+          if (!sauce.usersDisliked.includes(userId)) {
+            userLike = userParams[2];
+            userTab = userParams[3];
+          }
+          break;
+        }
+        default: {
+          res.status(400).json({ error });
+          break;
+        }
+      }
+      
+      Sauce.updateOne({ _id: req.params.id }, {
+        $inc: { [userLike]: number },
+        [modifTab] : { [userTab]: userId }
+      })
+      .then(() => res.status(200).json({ message: 'Ok'}))
+      .catch(error => res.status(400).json({ error }));
+  })
+  .catch( error => {
+    res.status(500).json({ error });
+  });
+}
 
 
