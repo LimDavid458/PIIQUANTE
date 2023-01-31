@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
        const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
        const userId = decodedToken.userId;
        req.auth = {
-           userId: userId
+           userId: userId   // Create object authentication from req, to ​​be used by other routes
        };
 	next();
    } catch(error) {
